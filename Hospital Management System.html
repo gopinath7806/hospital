@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hospital Management System</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f2f5f5;--panel:#fff;--ink:#15262b;--mut:#5f747a;--line:#d8e1e3;--deep:#0e3b3f;--brand:#0f6b68;--bad:#c2402f;--ok:#1c7a4c;--field:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c181a;--panel:#142428;--ink:#e3eeed;--mut:#93a9ad;--line:#26393d;--deep:#081c1e;--brand:#3fb3ae;--bad:#f0806f;--ok:#58c68c;--field:#0f1d20;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0c181a;--panel:#142428;--ink:#e3eeed;--mut:#93a9ad;--line:#26393d;--deep:#081c1e;--brand:#3fb3ae;--bad:#f0806f;--ok:#58c68c;--field:#0f1d20;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.side{background:var(--deep);color:#d5e6e4;padding:1.5rem 1rem;display:flex;flex-direction:column;gap:1.5rem}
+.brand{font-size:1.15rem;font-weight:600;line-height:1.2;color:#fff;padding:0 .5rem}
+.side nav{display:flex;flex-direction:column;gap:2px}
+.side nav button{font:inherit;text-align:left;background:none;border:0;color:inherit;padding:.55rem .75rem;border-radius:6px;cursor:pointer}
+.side nav button:hover{background:rgba(255,255,255,.08)}
+.side nav button.on{background:#fff;color:#0e3b3f;font-weight:600}
+.main{padding:1.75rem 2rem 3rem;min-width:0}
+h1{font-size:1.5rem;margin:0;font-weight:600}
+h2{font-size:1.05rem;margin:0 0 .75rem;font-weight:600}
+.head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.head>div{display:flex;gap:.6rem;flex-wrap:wrap}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1.1rem 1.25rem}
+.sc{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:.85rem;color:var(--mut);padding:.5rem .75rem;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:.65rem .75rem;border-bottom:1px solid var(--line)}
+tbody tr:last-child td{border-bottom:0}
+.act{white-space:nowrap;text-align:right}
+.mut{color:var(--mut)}
+.tag{display:inline-block;padding:.1rem .55rem;border-radius:999px;font-size:.8rem;border:1px solid var(--brand);color:var(--brand)}
+.tag.ok{border-color:var(--ok);color:var(--ok)}.tag.bad{border-color:var(--bad);color:var(--bad)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1.25rem}
+.stats div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.9rem 1.1rem}
+.stats b{display:block;font-size:1.4rem;font-weight:600}
+.btn{font:inherit;padding:.5rem 1rem;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.btn.p{background:var(--brand);border-color:var(--brand);color:#fff}
+.lk{font:inherit;background:none;border:0;color:var(--brand);cursor:pointer;padding:.2rem .4rem}
+.lk:hover{text-decoration:underline}.lk.bad{color:var(--bad)}
+input,select{font:inherit;padding:.5rem .65rem;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);width:100%}
+input[type=search]{width:220px}
+:focus-visible{outline:3px solid var(--brand);outline-offset:1px}
+dialog{border:0;border-radius:10px;padding:0;width:min(480px,calc(100vw - 2rem));background:var(--panel);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(5,30,32,.55)}
+form{padding:1.4rem;display:flex;flex-direction:column;gap:.85rem}
+label{display:flex;flex-direction:column;gap:.25rem;font-size:.9rem;font-weight:500}
+.fa{display:flex;justify-content:flex-end;gap:.5rem}
+.err{color:var(--bad);margin:0;min-height:1.2em;font-size:.9rem}
+#toast{position:fixed;left:50%;bottom:calc(1.5rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--deep);color:#fff;padding:.6rem 1rem;border-radius:6px;display:none;z-index:9}
+@media(max-width:820px){.app{grid-template-columns:1fr}.side{padding:.75rem 1rem;gap:.5rem}.side nav{flex-direction:row;overflow-x:auto}.main{padding:1.25rem 1rem 2rem}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">Hospital<br>Management</div>
+    <nav id="nav"></nav>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<dialog id="dlg"><form id="fm"></form></dialog>
+<div id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let db;try{db=JSON.parse(localStorage.getItem('hms'))}catch(e){}
+db=db||{patients:[],doctors:[],appointments:[],bills:[],n:1};
+const save=()=>{try{localStorage.setItem('hms',JSON.stringify(db))}catch(e){}};
+const nm=(t,id)=>(db[t].find(x=>x.id==id)||{}).name||'(deleted)';
+const S=['Scheduled','Completed','Cancelled'];
+const E={
+patients:{t:'Patients',o:'patient',f:[['name','Full name','text',1],['age','Age','number',1],['gender','Gender','select',1,['Female','Male','Other']],['blood','Blood group','text'],['phone','Phone','text'],['address','Address','text']],c:['name','age','gender','blood','phone']},
+doctors:{t:'Doctors',o:'doctor',f:[['name','Full name','text',1],['spec','Specialization','text',1],['days','Available days','text'],['phone','Phone','text'],['email','Email','email']],c:['name','spec','days','phone']},
+appointments:{t:'Appointments',o:'appointment',f:[['patient','Patient','patients',1],['doctor','Doctor','doctors',1],['date','Date','date',1],['time','Time','time',1],['reason','Reason','text'],['status','Status','select',1,S]],c:['date','time','patient','doctor','reason','status']},
+bills:{t:'Billing',o:'bill',f:[['patient','Patient','patients',1],['desc','Description','text',1],['amount','Amount (₹)','number',1]],c:['patient','desc','amount','status']}
+};
+const NAV=[['dashboard','Dashboard'],['patients','Patients'],['doctors','Doctors'],['appointments','Appointments'],['bills','Billing']];
+let view='dashboard';
+const hd=(t,k)=>(E[t].f.find(x=>x[0]==k)||[0,'Status'])[1];
+function cell(t,r,k){
+  const f=E[t].f.find(x=>x[0]==k)||[];let v=r[k];
+  if(f[2]=='patients'||f[2]=='doctors')v=nm(f[2],v);
+  if(k=='amount')return '₹'+(+v).toFixed(2);
+  if(k=='status')return `<span class="tag ${v=='Paid'||v=='Completed'?'ok':v=='Unpaid'||v=='Cancelled'?'bad':''}">${esc(v)}</span>`;
+  return esc(v);
+}
+function dash(){
+  const today=new Date().toLocaleDateString('en-CA');
+  const rows=db.appointments.filter(a=>a.date==today).sort((a,b)=>a.time.localeCompare(b.time));
+  const unpaid=db.bills.filter(b=>b.status=='Unpaid').reduce((s,b)=>s+ +b.amount,0);
+  return `<div class="head"><h1>Today, ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</h1><div><button class="btn p" data-a="nav" data-v="appointments">Book appointment</button></div></div>
+  <section class="panel"><h2>Today’s appointments (${rows.length})</h2>`+(rows.length?`<div class="sc"><table><thead><tr><th>Time</th><th>Patient</th><th>Doctor</th><th>Reason</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.time)}</td><td>${esc(nm('patients',r.patient))}</td><td>${esc(nm('doctors',r.doctor))}</td><td>${esc(r.reason)}</td><td>${cell('appointments',r,'status')}</td></tr>`).join('')}</tbody></table></div>`:`<p class="mut">No appointments are booked for today. Book one from the Appointments page.</p>`)+`</section>
+  <div class="stats"><div><b>${db.patients.length}</b><span class="mut">Registered patients</span></div><div><b>${db.doctors.length}</b><span class="mut">Doctors on staff</span></div><div><b>₹${unpaid.toFixed(2)}</b><span class="mut">Unpaid bills</span></div></div>`;
+}
+function list(t){
+  const e=E[t],rows=[...db[t]].reverse();
+  return `<div class="head"><h1>${e.t}</h1><div><input type="search" id="q" placeholder="Search ${e.t.toLowerCase()}" aria-label="Search ${e.t.toLowerCase()}"><button class="btn p" data-a="add">Add ${e.o}</button></div></div><section class="panel">`+
+  (rows.length?`<div class="sc"><table><thead><tr>${e.c.map(k=>`<th>${hd(t,k)}</th>`).join('')}<th></th></tr></thead><tbody>${rows.map(r=>`<tr>${e.c.map(k=>`<td>${cell(t,r,k)}</td>`).join('')}<td class="act">${t=='bills'?(r.status=='Unpaid'?`<button class="lk" data-a="pay" data-id="${r.id}">Mark paid</button>`:''):`<button class="lk" data-a="edit" data-id="${r.id}">Edit</button>`}<button class="lk bad" data-a="del" data-id="${r.id}">Delete</button></td></tr>`).join('')}</tbody></table></div>`:`<p class="mut">No ${e.t.toLowerCase()} yet. Add the first ${e.o} to get started.</p>`)+`</section>`;
+}
+function render(){
+  $('#nav').innerHTML=NAV.map(([v,l])=>`<button data-a="nav" data-v="${v}" class="${v==view?'on':''}">${l}</button>`).join('');
+  $('#main').innerHTML=view=='dashboard'?dash():list(view);
+  const q=$('#q');
+  if(q)q.oninput=()=>{const s=q.value.toLowerCase().trim();document.querySelectorAll('tbody tr').forEach(tr=>tr.hidden=s&&!tr.textContent.toLowerCase().includes(s))};
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2200)}
+function openForm(t,id){
+  const e=E[t],r=id?db[t].find(x=>x.id==id):{status:'Scheduled'};
+  for(const f of e.f)if((f[2]=='patients'||f[2]=='doctors')&&!db[f[2]].length)return toast(`Add a ${f[2]=='patients'?'patient':'doctor'} first.`);
+  const fm=$('#fm');fm.dataset.t=t;fm.dataset.id=id||'';
+  fm.innerHTML=`<h2>${id?'Edit':'Add'} ${e.o}</h2>`+e.f.map(([k,l,ty,req,op])=>{
+    const v=r[k]??'';let inp;
+    if(ty=='select')inp=`<select name="${k}">${op.map(o=>`<option ${o==v?'selected':''}>${o}</option>`).join('')}</select>`;
+    else if(ty=='patients'||ty=='doctors')inp=`<select name="${k}" required><option value="">Select</option>${db[ty].map(x=>`<option value="${x.id}" ${x.id==v?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+    else inp=`<input name="${k}" type="${ty}" value="${esc(v)}" ${req?'required':''} ${ty=='number'?(k=='age'?'min="0" max="120"':'min="0.01" step="0.01"'):''}>`;
+    return `<label>${l}${inp}</label>`}).join('')+
+  `<p class="err" id="err" role="alert"></p><div class="fa"><button type="button" class="btn" data-a="close">Cancel</button><button class="btn p">Save ${e.o}</button></div>`;
+  $('#dlg').showModal();
+}
+$('#fm').onsubmit=ev=>{
+  ev.preventDefault();
+  const fm=ev.target,t=fm.dataset.t,id=fm.dataset.id,d=Object.fromEntries(new FormData(fm));
+  if(d.name)d.name=d.name.trim();
+  if(t=='appointments'&&d.status!='Cancelled'&&db.appointments.some(a=>a.id!=id&&a.doctor==d.doctor&&a.date==d.date&&a.time==d.time&&a.status!='Cancelled'))
+    return $('#err').textContent='That doctor already has an appointment at this time. Pick another slot.';
+  if(id)Object.assign(db[t].find(x=>x.id==id),d);
+  else db[t].push({id:db.n++,...(t=='bills'?{status:'Unpaid'}:{}),...d});
+  save();$('#dlg').close();render();toast('Saved.');
+};
+document.addEventListener('click',ev=>{
+  const b=ev.target.closest('[data-a]');if(!b)return;
+  const a=b.dataset.a,id=b.dataset.id;
+  if(a=='nav'){view=b.dataset.v;render()}
+  else if(a=='add')openForm(view);
+  else if(a=='edit')openForm(view,id);
+  else if(a=='close')$('#dlg').close();
+  else if(a=='pay'){db.bills.find(x=>x.id==id).status='Paid';save();render();toast('Bill marked as paid.')}
+  else if(a=='del'&&confirm('Delete this record? Related appointments and bills are deleted too.')){
+    db[view]=db[view].filter(x=>x.id!=id);
+    if(view=='patients'){db.appointments=db.appointments.filter(x=>x.patient!=id);db.bills=db.bills.filter(x=>x.patient!=id)}
+    if(view=='doctors')db.appointments=db.appointments.filter(x=>x.doctor!=id);
+    save();render();toast('Deleted.');
+  }
+});
+render();
+</script>
+</body>
+</html>

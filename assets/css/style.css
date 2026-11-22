@@ -1,0 +1,68 @@
+:root{--bg:#f2f5f5;--panel:#fff;--ink:#15262b;--mut:#5f747a;--line:#d8e1e3;--deep:#0e3b3f;--brand:#0f6b68;--bad:#c2402f;--ok:#1c7a4c;--field:#fff;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0c181a;--panel:#142428;--ink:#e3eeed;--mut:#93a9ad;--line:#26393d;--deep:#081c1e;--brand:#3fb3ae;--bad:#f0806f;--ok:#58c68c;--field:#0f1d20;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.side{background:var(--deep);color:#d5e6e4;padding:1.5rem 1rem;display:flex;flex-direction:column;gap:1.5rem}
+.brand{font-size:1.15rem;font-weight:600;line-height:1.2;color:#fff;padding:0 .5rem}
+.side nav{display:flex;flex-direction:column;gap:2px}
+.side nav a{color:inherit;text-decoration:none;padding:.55rem .75rem;border-radius:6px}
+.side nav a:hover{background:rgba(255,255,255,.08)}
+.side nav a.on{background:#fff;color:#0e3b3f;font-weight:600}
+.main{padding:1.75rem 2rem 3rem;min-width:0}
+h1{font-size:1.5rem;margin:0;font-weight:600}
+h2{font-size:1.05rem;margin:0 0 .75rem;font-weight:600}
+.head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.head>div{display:flex;gap:.6rem;flex-wrap:wrap}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1.1rem 1.25rem}
+.sc{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:.85rem;color:var(--mut);padding:.5rem .75rem;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:.65rem .75rem;border-bottom:1px solid var(--line)}
+tbody tr:last-child td{border-bottom:0}
+.act{white-space:nowrap;text-align:right}
+.mut{color:var(--mut)}
+.tag{display:inline-block;padding:.1rem .55rem;border-radius:999px;font-size:.8rem;border:1px solid var(--brand);color:var(--brand)}
+.tag.ok{border-color:var(--ok);color:var(--ok)}.tag.bad{border-color:var(--bad);color:var(--bad)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1.25rem}
+.stats div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.9rem 1.1rem}
+.stats b{display:block;font-size:1.4rem;font-weight:600}
+.btn{font:inherit;padding:.5rem 1rem;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
+.btn.p{background:var(--brand);border-color:var(--brand);color:#fff}
+.lk{font:inherit;background:none;border:0;color:var(--brand);cursor:pointer;padding:.2rem .4rem}
+.lk:hover{text-decoration:underline}.lk.bad{color:var(--bad)}
+input,select{font:inherit;padding:.5rem .65rem;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--ink);width:100%}
+input[type=search]{width:220px}
+:focus-visible{outline:3px solid var(--brand);outline-offset:1px}
+dialog{border:0;border-radius:10px;padding:0;width:min(480px,calc(100vw - 2rem));background:var(--panel);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(5,30,32,.55)}
+form{padding:1.4rem;display:flex;flex-direction:column;gap:.85rem}
+label{display:flex;flex-direction:column;gap:.25rem;font-size:.9rem;font-weight:500}
+.fa{display:flex;justify-content:flex-end;gap:.5rem}
+.err{color:var(--bad);margin:0;min-height:1.2em;font-size:.9rem}
+#toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);background:var(--deep);color:#fff;padding:.6rem 1rem;border-radius:6px;display:none;z-index:9}
+@media(max-width:820px){.app{grid-template-columns:1fr}.side{padding:.75rem 1rem;gap:.5rem}.side nav{flex-direction:row;overflow-x:auto}.main{padding:1.25rem 1rem 2rem}}
+@media print{.side,.head>div,.act{display:none}.app{display:block}}
+
+
+
+/* Invoice: hidden on screen, shown only when printing a bill */
+#invoice{display:none}
+.inv{max-width:720px;margin:0 auto;color:#000;font-size:14px}
+.inv h1{font-size:1.6rem}
+.inv .ih{display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:.8rem;margin-bottom:1rem}
+.inv table{margin:1.2rem 0}
+.inv th,.inv td{color:#000;border-bottom:1px solid #999;padding:.5rem .4rem}
+.inv .r{text-align:right}
+.inv .sig{margin-top:4rem;border-top:1px solid #000;width:220px;padding-top:.3rem}
+
+@media print{
+  :root{color-scheme:light}
+  body,.panel{background:#fff!important;color:#000!important}
+  .side,.head>div,#toast{display:none!important}
+  .app{display:block}
+  .main{padding:0}
+  .ls th:last-child,.ls td:last-child{display:none}
+  body.pi .app{display:none}
+  body.pi #invoice{display:block}
+}
